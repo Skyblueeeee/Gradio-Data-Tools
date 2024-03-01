@@ -1,0 +1,5 @@
+{
+    "default_app_address": "10.10.1.129",
+    "database_dir":"scripts/datatools_fiftyone/fo_data",
+    "default_app_port": 8003
+}

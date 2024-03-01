@@ -1,0 +1,14 @@
+
+.refreshbutton {
+    margin-buttom: 0em 0em 0em 0em;
+    max-width: 6em;
+    min-width: 6em !important;
+    height: 6em;
+}
+footer.svelte-1ax1toq {
+    display: none !important;
+}
+
+tr:hover {
+    background-color: #ffff99;
+  }

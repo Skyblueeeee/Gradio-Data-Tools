@@ -1,0 +1,1 @@
+&msg&nmssky&nms&tit这是手动输入样例&tit&bdy正在测试手动输入的功能&bdy&msg
