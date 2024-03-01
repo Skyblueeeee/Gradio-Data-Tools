@@ -1,5 +1,6 @@
 @echo off
 set PYTHON_PATH=..\python_env\py38_gdt\python.exe
+
 if not exist "%PYTHON_PATH%" (
     echo Python is not installed or the path is incorrect.
 )

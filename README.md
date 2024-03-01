@@ -38,9 +38,13 @@
 
 ## 快速开始
 
-1.创建虚拟环境：conda create -n py38_gdt python==3.8
+1.创建虚拟环境：`conda create -n py38_gdt python==3.8`
 
-2.安装依赖包：pip install -r requirements.txt
+2.安装依赖包：`pip install -r requirements.txt`
+
+3.更改快捷启动虚拟环境路径 `PYTHON_PATH=..\python_env\py38_gdt\python.exe`
+
+4.双击启动!
 
 # ✦✦✦ slogan ✦✦✦
 
