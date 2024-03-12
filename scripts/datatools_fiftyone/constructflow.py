@@ -8,8 +8,7 @@ import fiftyone as fo
 from fiftyone import ViewField as F
 from fiftyone.types import COCODetectionDataset
 import scripts.datatools_fiftyone.fiftyone_dir as ff
-from scripts.datatools_fiftyone.fiftyone_dir.construct import FitowBaseLabelImporter
-from scripts.datatools_fiftyone.fiftyone_dir.construct import OldViaLabelTypes
+# import fiftyone_dir as ff
 
 import json
 import os,sys
@@ -28,7 +27,7 @@ def db_tags(db_name):
     
     return gr.Dropdown.update(choices=tags,value=tags[0]),sendtime
 
-def send_image(db_name,tag,send_dir,send_date):
+def send_image(db_name,tag,send_dir,send_date,via_classes):
     if db_name == "":
         return "数据库名称未填写"
     if tag == "" or send_date == "":
@@ -37,6 +36,10 @@ def send_image(db_name,tag,send_dir,send_date):
         return "请检查发图地址！未有该路径。"
     if os.path.exists(os.path.join(send_dir,send_date)):
         return "请检查发图路径！已有发图数据。"
+    label_dict = {}
+    for group in via_classes.to_dict("split")["data"]:
+        if group[0]!= "":
+            label_dict[group[0]]=group[1]
 
     cf = GRConstuctFlow(db_name, back_up=False)
     ds_view = cf.ds.match_tags([tag])
@@ -50,7 +53,7 @@ def send_image(db_name,tag,send_dir,send_date):
             overwrite=False,
             skip_failures=False,
             num_workers=16,
-            classes=["data_1","data_2"],
+            classes=label_dict,
             with_label=False,
             with_picture=True
         )
@@ -59,27 +62,29 @@ def send_image(db_name,tag,send_dir,send_date):
 
 # 构建user importer
 class GROriginDatasetImporter(ff.FitowBaseImporter):
-    def __init__(self, dataset_dir):
+    def __init__(self, dataset_dir,rule=""):
         self.dataset_dir = dataset_dir
+        self.rule = rule
 
     def _parse_one(self):
         N_dir = 0
         for group in os.walk(self.dataset_dir):
-            for file in group[2]:
-                if file.endswith((".jpg",".bmp",".png")):
-                    json_info = {"Tag":"标注图"}
+            if self.rule in group[0]:
+                for file in os.listdir(group[0]):
+                    if file.endswith((".jpg",".bmp",".png")):
+                        json_info = {"Origin_GR":"原图"}
 
-                    yield os.path.join(group[0], file),file, json_info
+                        yield os.path.join(group[0], file),file, json_info
 
     def get_sample_field_schema(self):
         field_schema = {
             "filename": "fiftyone.core.fields.StringField",
-            "Tag":"fiftyone.core.fields.StringField",
+            "Origin_GR":"fiftyone.core.fields.StringField",
         }
         return field_schema
 
 class GRFileAttrVIADatasetImporter(ff.FitowBaseImporter):
-    def __init__(self, via_path, *args, **kwargs):
+    def __init__(self, via_path,rule="", *args, **kwargs):
         self.via_path = via_path
 
     def _parse_one(self):
@@ -105,7 +110,7 @@ class GRFileAttrVIADatasetImporter(ff.FitowBaseImporter):
         return field_schema
 
 class GRFileAttrCOCODatasetImporter(ff.FitowBaseImporter):
-    def __init__(self, coco_path, *args, **kwargs):
+    def __init__(self, coco_path,rule="", *args, **kwargs):
         self.coco_path = coco_path
 
     def _parse_one(self):
@@ -137,94 +142,132 @@ class GRConstuctFlow(ff.ConstructFlow):
     def __init__(self, dataset_name, back_up=True, *args, **kwargs):
         super().__init__(dataset_name, back_up, *args, **kwargs)
 
-    def run(self, origin_dir="",init_dateset = 0,merge_origin = 0,merge_label=0,label_attr=0,via_coco_mode="COCO",to_sql = 0,to_sql_dir="",del_db=0,del_mode="equal"):
+    def run(self, origin_dir="",imgdir_rule="",file_uniqe = 0,init_dateset = 0,merge_origin = 0,merge_label=0,label_attr=0,via_coco_mode="COCO",to_sql = 0,to_sql_dir="",del_db=0,del_mode="equal"):
         # 数据库初始化
         if init_dateset:
             self.ds = self.init_dataset(self.dataset_name, self.back_up)
 
-        # 图片与标注信息录入
+        # 图片录入
         if merge_origin:
             self.merge(
                 GROriginDatasetImporter(
-                    dataset_dir=origin_dir)
-            )
+                    dataset_dir=origin_dir,rule=imgdir_rule),tags=["origin"])
+        
+        # 图片去重
+        if file_uniqe:
+            self.to_unique("filename")
+
         # 标注有效性
         if label_attr:
             for group in os.walk(origin_dir):
-                for each_file in group[2]:
-                    if each_file == "via_project.json" and via_coco_mode == "VIA":
-                        via_path = os.path.join(group[0],each_file)
-                        print(f"Fiftyone Runing {via_path} Valid Images")
-                        self.merge(
-                            GRFileAttrVIADatasetImporter(via_path=via_path),
-                            key_field="filename",
-                            omit_fields=["filepath"],
-                            insert_new=True
-                        )
-                    if "coco" in each_file and via_coco_mode == "COCO":
-                        coco_path = os.path.join(group[0],each_file)
-                        print(f"Fiftyone Runing {coco_path} Valid Images")
-                        self.merge(
-                            GRFileAttrCOCODatasetImporter(coco_path=coco_path),
-                            key_field="filename",
-                            omit_fields=["filepath"],
-                            insert_new=True
-                        )
+                if imgdir_rule in group[0]:
+                    for each_file in os.listdir(group[0]):
+                        if "via" in each_file and via_coco_mode == "VIA":
+                            via_path = os.path.join(group[0],each_file)
+                            print(f"Fiftyone Runing {via_path} Valid Images")
+                            self.merge(
+                                GRFileAttrVIADatasetImporter(via_path=via_path),
+                                key_field="filename",
+                                omit_fields=["filepath"],
+                                insert_new=True
+                            )
+                        if "coco" in each_file and via_coco_mode == "COCO":
+                            coco_path = os.path.join(group[0],each_file)
+                            print(f"Fiftyone Runing {coco_path} Valid Images")
+                            self.merge(
+                                GRFileAttrCOCODatasetImporter(coco_path=coco_path),
+                                key_field="filename",
+                                omit_fields=["filepath"],
+                                insert_new=True
+                            )
 
-        # 标注信息入库
+        # coco格式标注信息入库
         if merge_label and via_coco_mode == "COCO":
             import fiftyone as fo
             for group in os.walk(origin_dir):
-                for each_file in group[2]:
-                    if "coco" in each_file and each_file.endswith(".json"):
-                        coco_path = os.path.join(group[0],each_file)
-                        print(f"Fiftyone Runing {coco_path} labels")
-                        self.merge_labels(
-                            dataset_type=fo.types.COCODetectionDataset,
-                            data_path=group[0],
-                            labels_path= coco_path,
-                            label_field="ground_truth",
-                            label_types=["detections"],
-                            tags=["train"],
-                            key_field="filename",
-                            key_fcn=None,
-                            skip_existing=False,
-                            insert_new=False,
-                            fields=None,
-                            omit_fields=["filepath"],
-                            merge_lists=False,
-                            overwrite=True,
-                            expand_schema=True,
-                            add_info=True
-                        )
+                if imgdir_rule in group[0]:
+                    for each_file in os.listdir(group[0]):
+                        if "coco" in each_file and each_file.endswith(".json"):
+                            coco_path = os.path.join(group[0],each_file)
+                            print(f"Fiftyone Runing {coco_path} labels")
+                            self.merge_labels(
+                                dataset_type=fo.types.COCODetectionDataset,
+                                data_path=group[0],
+                                labels_path= coco_path,
+                                label_field="ground_truth",
+                                label_types=["detections"],
+                                tags=["train"],
+                                key_field="filename",
+                                key_fcn=None,
+                                skip_existing=False,
+                                insert_new=False,
+                                fields=None,
+                                omit_fields=["filepath"],
+                                merge_lists=False,
+                                overwrite=True,
+                                expand_schema=True,
+                                add_info=True
+                            )
 
-        # 新标注信息入库(直接使用包含width和height的via导入)
+        # via格式标注信息入库(直接使用包含width和height的via导入,没有则读取图片)
         if merge_label and via_coco_mode == "VIA":
             import fiftyone as fo
             for group in os.walk(origin_dir):
-                for each_file in group[2]:
-                    if each_file == "via_project.json":
-                        label_path = os.path.join(group[0], each_file)
-                        print(f"Fiftyone Runing {label_path} labels")
-                        self.merge_labels(
-                            dataset_type=ff.construct.ViaLabelTypes,
-                            data_path=group[0],
-                            labels_path= label_path,
-                            label_field="ground_truth",
-                            label_types=["detections"],
-                            tags=["train"],
-                            key_field="filename",
-                            key_fcn=None,
-                            skip_existing=False,
-                            insert_new=False,
-                            fields=None,
-                            omit_fields=["filepath", "metadata"],
-                            merge_lists=False,
-                            overwrite=True,
-                            expand_schema=True,
-                            add_info=True
-                        )
+                if imgdir_rule in group[0]:
+                    for each_file in os.listdir(group[0]):
+                        if "via" in each_file and each_file.endswith(".json"):
+                            label_path = os.path.join(group[0], each_file)
+                            print(f"Fiftyone Runing {label_path} labels")
+                            self.merge_labels(
+                                dataset_type=ff.construct.ViaLabelTypes,
+                                data_path=group[0],
+                                labels_path= label_path,
+                                label_field="ground_truth",
+                                label_types=["detections"],
+                                tags=["train"],
+                                key_field="filename",
+                                key_fcn=None,
+                                skip_existing=False,
+                                insert_new=False,
+                                fields=None,
+                                omit_fields=["filepath", "metadata"],
+                                merge_lists=False,
+                                overwrite=True,
+                                expand_schema=True,
+                                add_info=True
+                            )
         
+        # yolo格式标注信息入库
+        if merge_label and via_coco_mode == "YOLO":
+            import fiftyone as fo
+            for group in os.walk(origin_dir):
+                if imgdir_rule in group[0]:
+                    for each_file in os.listdir(group[0]):
+                        if each_file == "data.yaml":
+                            label_path = os.path.join(group[0], each_file)
+                            print(f"Fiftyone Runing {label_path} labels")
+                            self.merge_labels(
+                                dataset_type=fo.types.YOLOv5Dataset,
+                                dataset_dir=group[0],
+                                yaml_path=label_path,
+                                split="val",
+                                data_path=group[0],
+                                labels_path= label_path,
+                                label_field="ground_truth",
+                                label_types=["detections"],
+                                tags=["train"],
+                                key_field="filename",
+                                key_fcn=None,
+                                skip_existing=False,
+                                insert_new=False,
+                                fields=None,
+                                omit_fields=["filepath", "metadata"],
+                                merge_lists=False,
+                                overwrite=True,
+                                expand_schema=True,
+                                add_info=True
+                            )
+
         # 导出最终版sql库，供正常使用
         if to_sql:
             import subprocess
@@ -237,19 +280,18 @@ class GRConstuctFlow(ff.ConstructFlow):
             self.delete_datasets(dataset_name=self.dataset_name,mode=del_mode)
 
 if __name__ == "__main__":
-    db_name = "fy_hg"
+    db_name = "hanfeng"
     send_dir = "D:/AI"
     send_date ="发图_240112"
     db_backup = False
-    ori_dir = "Y:/label/"
+    ori_dir = r"D:\20220819"
+    via_classes = ""
 
     cf = GRConstuctFlow(db_name, back_up=db_backup)
     cf.run( origin_dir= ori_dir,
-            init_dateset = 0,merge_origin = 0,  
-            merge_label  = 0,label_attr =0,via_coco_mode="VIA",
-            to_sql = 0, to_sql_dir = "",
-            del_db = 0, del_mode = "equal"
+            init_dateset = 1,merge_origin = 1,  
+            merge_label  = 1,label_attr =0,via_coco_mode="YOLO"
     )
     
 
-    send_image(db_name,send_dir,send_date)
+    # send_image(db_name,send_dir,send_date,via_classes)

@@ -1,0 +1,22 @@
+filename,output,flag,username,timestamp
+D:\shy_code\tools_develop\Gradio-Data-Tools\log\gdt.log,"2024-03-04 17:51:36,602 - Gradio-Data-Tools
+2024-03-04 17:51:36,603 - Starting Gradio-Data-Tools Server...
+2024-03-04 17:51:36,603 - Point your web browser to http://10.10.1.129:8001/
+2024-03-04 17:51:36,603 - G-D-T Server：Fiftyone Initializing the database...
+2024-03-04 17:52:12,386 - G-D-T Server: FiftyOne Server Running...
+2024-03-04 17:52:12,386 - G-D-T Server: 
+2024-03-04 17:52:12,387 - G-D-T Server: Could not connect session, trying again in 10 seconds
+2024-03-04 17:52:12,387 - G-D-T Server: 
+2024-03-04 17:52:12,387 - G-D-T Server: App launched. Point your web browser to http://localhost:8003
+2024-03-04 17:52:12,670 - G-D-T Server: FiftyOne Server Startup Complete!
+2024-03-04 17:52:12,671 - G-D-T Error: D:\shy_code\tools_develop\python_env\py38_gdt\lib\site-packages\gradio_client\documentation.py:102: UserWarning: Could not get documentation group for <class 'gradio.mix.Parallel'>: No known documentation group for module 'gradio.mix'
+2024-03-04 17:52:12,671 - G-D-T Error: warnings.warn(f""Could not get documentation group for {cls}: {exc}"")
+2024-03-04 17:52:12,672 - G-D-T Error: D:\shy_code\tools_develop\python_env\py38_gdt\lib\site-packages\gradio_client\documentation.py:102: UserWarning: Could not get documentation group for <class 'gradio.mix.Series'>: No known documentation group for module 'gradio.mix'
+2024-03-04 17:52:12,672 - G-D-T Error: warnings.warn(f""Could not get documentation group for {cls}: {exc}"")
+2024-03-05 09:15:52,814 - G-D-T Server: Running on local URL:  http://10.10.1.129:8001
+2024-03-05 09:15:52,814 - G-D-T Server: 
+2024-03-05 09:15:52,815 - G-D-T Server: To create a public link, set `share=True` in `launch()`.
+2024-03-05 09:15:52,815 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.02s
+2024-03-05 09:15:52,815 - G-D-T Server: 
+2024-03-05 09:18:13,624 - Gradio-Data-Tools Server Failed To Start with returncode: 3221225786
+",,,2024-03-05 09:19:17.521354

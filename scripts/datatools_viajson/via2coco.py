@@ -34,7 +34,7 @@ def findlabelnum(v,dic):
             return i+1
     assert -1
 N_COCO_ID = 0
-def run_viatococo(root_dir,via_name, save_coco_name,supercategory,input_img_width=2000,input_img_heigh=2000):
+def run_viatococo(root_dir,via_name, save_coco_name,supercategory,input_img_width=None,input_img_heigh=None):
     #########################注意事项#########################
     # 该脚本不会转换无效图和其上的标签
     #########################参数调整#########################

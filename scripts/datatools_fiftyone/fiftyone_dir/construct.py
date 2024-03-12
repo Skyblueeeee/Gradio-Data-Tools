@@ -6,6 +6,7 @@ from fiftyone.types.dataset_types import ImageDetectionDataset
 from .extends.ann_utils import ViaFile
 import numpy as np
 import cv2
+
 class FitowBaseImporter(foud.GenericSampleDatasetImporter):
     def __init__(self, *args, **kwargs):
         pass
@@ -181,6 +182,7 @@ class OldViaLabelImporter(FitowBaseLabelImporter):
             "detections": "fiftyone.core.labels.Detections",
         }
         return label_field_schema
+
 class OldViaLabelTypes(ImageDetectionDataset):
     def get_dataset_importer_cls(self):
         return OldViaLabelImporter

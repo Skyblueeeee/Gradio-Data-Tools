@@ -16,55 +16,56 @@ def plot(a):
                                  x="x",y="y",title="标签折线图",x_title="Label",y_title="Number",height=400,width=1400),gr.BarPlot.update(value=pd.DataFrame(new_dict),
                                  x="x",y="y",title="标签条形图",x_title="Label",y_title="Number",height=400,width=1400)
 
-def print_statistics(root_dir):
+def print_statistics(root_dir,rule):
     categoryStatusDict = {}
     totalBoxes = 0
     totalImgs = 0
     usageImgSet = set()
     for group in os.walk(root_dir):
-        for each_file in group[2]:
-            new_dict = {}
-            if "coco" in each_file and each_file.endswith(".json"):
-                json_path = os.path.join(group[0], each_file)
-                with open(json_path, "r", encoding="utf-8") as fp:
-                    cocoDict = json.load(fp)
+        if rule in group[0]:
+            for each_file in os.listdir(group[0]):
+                new_dict = {}
+                if "coco" in each_file and each_file.endswith(".json"):
+                    json_path = os.path.join(group[0], each_file)
+                    with open(json_path, "r", encoding="utf-8") as fp:
+                        cocoDict = json.load(fp)
 
-                images = cocoDict.pop("images")
-                categories = cocoDict.pop("categories")
-                annotations = cocoDict.pop("annotations")
+                    images = cocoDict.pop("images")
+                    categories = cocoDict.pop("categories")
+                    annotations = cocoDict.pop("annotations")
 
-                # 总图片数量
-                totalImgs += len(images)
-                
-                # 统计每个标签的框出数
-                catDict = {each["id"]: each["name"] for each in categories}
-                imgDict = {each["id"]: each["file_name"] for each in images}
-                for eachCatID,eachlabel in catDict.items():
-                    catName = catDict[eachCatID]
-                    tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
-                    categoryStatusDict[catName] = tempIndex
-                    new_dict[eachlabel] = ""
+                    # 总图片数量
+                    totalImgs += len(images)
+                    
+                    # 统计每个标签的框出数
+                    catDict = {each["id"]: each["name"] for each in categories}
+                    imgDict = {each["id"]: each["file_name"] for each in images}
+                    for eachCatID,eachlabel in catDict.items():
+                        catName = catDict[eachCatID]
+                        tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
+                        categoryStatusDict[catName] = tempIndex
+                        new_dict[eachlabel] = ""
 
-                for eachAnnotation in annotations:
-                    catName = catDict[eachAnnotation["category_id"]]
-                    tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
-                    tempIndex[1] += 1
-                    if isinstance(eachAnnotation["image_id"],str):
-                        imgs_id = int(eachAnnotation["image_id"])
-                        tempIndex[2].add(imgDict[imgs_id])
-                    else:
-                        tempIndex[2].add(eachAnnotation["image_id"])
+                    for eachAnnotation in annotations:
+                        catName = catDict[eachAnnotation["category_id"]]
+                        tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
+                        tempIndex[1] += 1
+                        if isinstance(eachAnnotation["image_id"],str):
+                            imgs_id = int(eachAnnotation["image_id"])
+                            tempIndex[2].add(imgDict[imgs_id])
+                        else:
+                            tempIndex[2].add(eachAnnotation["image_id"])
 
-                    categoryStatusDict[catName] = tempIndex
+                        categoryStatusDict[catName] = tempIndex
 
-            # if "via_" in each_file and each_file.endswith(".json"):
-            #     json_path = os.path.join(group[0], each_file)
-            #     with open(json_path, "r", encoding="utf-8") as fp:
-            #         viaDict = json.load(fp)
-            #         label_dict = viaDict["_via_attributes"]["region"]
-            #         for keys in label_dict.items():
-            #             n_dict = {v: k for k, v in keys[1]["options"].items()}
-            #         new_dict = n_dict        
+                # if "via_" in each_file and each_file.endswith(".json"):
+                #     json_path = os.path.join(group[0], each_file)
+                #     with open(json_path, "r", encoding="utf-8") as fp:
+                #         viaDict = json.load(fp)
+                #         label_dict = viaDict["_via_attributes"]["region"]
+                #         for keys in label_dict.items():
+                #             n_dict = {v: k for k, v in keys[1]["options"].items()}
+                #         new_dict = n_dict        
     res = []
     for each in categoryStatusDict.keys():
         res.append ([

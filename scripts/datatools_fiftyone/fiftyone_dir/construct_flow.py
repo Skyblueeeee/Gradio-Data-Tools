@@ -365,7 +365,7 @@ class ConstructFlow(object):
     @flow_api
     def to_annotation(self, dataset: DatasetView,
         save_dir: str, file_name: str="ff_export.json",
-        classes: list=None,  mode="via", with_picture=True,
+        classes: dict=None,  mode="via", with_picture=True,
         with_label=False, field="ground_truth",
         overwrite=False, skip_failures=False, num_workers=8):
         """

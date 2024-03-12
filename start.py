@@ -9,9 +9,11 @@ sys.argv[-1]
 
 python38_path = sys.argv[-1]
 main_script_path = r'main.py'
+log_file_path = "log/gdt_log.log"
 
 # 日志服务
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename=log_file_path, filemode='a', force=True)
 logging.info('Gradio-Data-Tools')
 logging.info('Starting Gradio-Data-Tools Server...')
 logging.info("Point your web browser to http://10.10.1.129:8001/")

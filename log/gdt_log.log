@@ -1,0 +1,14 @@
+2024-03-05 10:26:56,650 - Gradio-Data-Tools
+2024-03-05 10:26:56,650 - Starting Gradio-Data-Tools Server...
+2024-03-05 10:26:56,650 - Point your web browser to http://10.10.1.129:8001/
+2024-03-05 10:26:56,650 - G-D-T Server��Fiftyone Initializing the database...
+2024-03-05 10:27:06,925 - G-D-T Server: FiftyOne Server Running...
+2024-03-05 10:27:07,039 - G-D-T Server: Connected to FiftyOne on port 8003 at 10.10.1.129.
+2024-03-05 10:27:07,149 - G-D-T Server: If you are not connecting to a remote session, you may need to start a new session and specify a port
+2024-03-05 10:27:07,618 - G-D-T Server: App launched. Point your web browser to http://localhost:8003
+2024-03-05 10:27:07,905 - G-D-T Server: FiftyOne Server Startup Complete!
+2024-03-05 10:29:09,381 - G-D-T Server: Running on local URL:  http://10.10.1.129:8000
+2024-03-05 10:29:09,607 - G-D-T Server: To create a public link, set `share=True` in `launch()`.
+2024-03-05 10:29:09,717 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.02s
+2024-03-05 10:29:09,941 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.01s
+2024-03-05 10:29:10,163 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.01s

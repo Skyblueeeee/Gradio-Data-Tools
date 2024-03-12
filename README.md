@@ -1,10 +1,15 @@
-# 欢迎使用数据脚本处理平台~
+![](ui\imgs\mt_logo.jpg)
 
-本平台基于Gradio Python库构建，旨在为用户提供一个通用、高效的脚本执行环境。作为模型训练的第一站，我们支持多人多任务同时操作，确保工作效率最大化。
+本平台主要基于Gradio Python库构建，旨在为用户提供一个通用、高效的脚本执行环境。作为模型训练的第一站，我们支持多人多任务同时操作，确保工作效率最大化。
 
-## **核心功能特色**:
+<center> Gradio <a href="https://www.gradio.app/"> ✨✨ </a> ｜  FiFtyone <a href="https://github.com/voxel51/fiftyone"> ✨✨ </a>&nbsp ｜ MMDET <a href="https://github.com/open-mmlab/mmdetection"> ✨✨</a>&nbsp  </center>
+
+
+## 核心功能特色:
 
 **✦Fiftyone数据管理**：灵活导入数据，实现数据库的精细化管理。支持数据的导出、删除，以及有效与空图的快速检查。标签校验与发标注图等任务一键完成。
+
+✦**AI自动标注**：支持手动上传模型进行预标注，自动生成via与coco文件，可一键执行数据分析与数据管理任务。
 
 **✦数据统计分析**：对COCO格式文件进行深入分析，精确统计图片与标签的数量及其分布，为模型训练前提供有力支持。
 
@@ -12,11 +17,26 @@
 
 **✦提取标注标签**：可选择保留图像中现有标签，或进行转换，支持一键导出为COCO格式，满足不同需求。
 
-**✦JSON文件处理**：提供VIA与COCO格式之间的无缝转换，以及VIA到YOLO格式的转换。via2coco转换特别优化，自动过滤无效和空图，确保image_id为整数型。
+**✦JSON文件处理**：提供VIA与COCO格式之间转换，以及VIA和YOLO格式之间的转换。via2coco转换特别优化，自动过滤无效和空图，确保image_id为整数型。
 
 平台将持续迭代，引入更多实用功能，助力您的数据工作流程更加流畅和高效。
 
 ## 更新日志
+
+### 待定功能
+【数据管理】[入库模式]增加TXT格式。
+
+### 20240312-更新功能
+
+【AI预标注】模块上线，支持手动上传模型进行推理标注，自动标注完成后生成via与coco文件。[测试中]
+
+### 20240305-更新功能
+
+【数据管理】增加[数据库录入]原图默认tag、强制图片名去重；增加目录条件检索、[数据库发图]模板填写功能。
+
+【数据分析】增加目录条件检索。
+
+【JSON互转】增加YOLO转VIA格式。
 
 ### 20240227-修复BUG
 
@@ -38,11 +58,32 @@
 
 ## 快速开始
 
-1.创建虚拟环境：`conda create -n py38_gdt python==3.8`
+1.创建虚拟环境：
 
-2.安装依赖包：`pip install -r requirements.txt`
+```
+conda create -n py38_gdt python==3.8
+```
 
-3.更改快捷启动虚拟环境路径 `PYTHON_PATH=..\python_env\py38_gdt\python.exe`
+2.安装torch、torchvision
+
+```
+下载Torch、Torchvision：torch-1.11.0%2Bcu115-cp38   torchvision-0.12.0%2Bcu115-cp38
+https://download.pytorch.org/whl/torch_stable.html
+
+cd Gradio-Data-Tools
+
+pip install 下载的torch
+
+pip install 下载的torchvision
+
+pip install -r requirements.txt
+```
+
+3.更改快捷启动虚拟环境路径 :
+
+```
+PYTHON_PATH=..\python_env\py38_gdt\python.exe
+```
 
 4.双击启动!
 
