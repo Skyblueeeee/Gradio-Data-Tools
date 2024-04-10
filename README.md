@@ -2,7 +2,7 @@
 
 本平台主要基于Gradio Python库构建，旨在为用户提供一个通用、高效的脚本执行环境。作为模型训练的第一站，我们支持多人多任务同时操作，确保工作效率最大化。
 
-<center> Gradio <a href="https://www.gradio.app/"> ✨✨ </a> ｜  FiFtyone <a href="https://github.com/voxel51/fiftyone"> ✨✨ </a>&nbsp ｜ MMDET <a href="https://github.com/open-mmlab/mmdetection"> ✨✨</a>&nbsp  </center>
+<center><b>Gradio</b> <a href="https://www.gradio.app/"> ✨✨ </a> ｜  <b>FiFtyone</b> <a href="https://github.com/voxel51/fiftyone"> ✨✨ </a>&nbsp;｜ <b>MMDET</b> <a href="https://github.com/open-mmlab/mmdetection"> ✨✨</a>&nbsp;｜ <b>Github</b> <a href="https://github.com/Skyblueeeee/Gradio-Data-Tools"> ✨✨</a>&nbsp; </center>
 
 ## 核心功能特色:
 

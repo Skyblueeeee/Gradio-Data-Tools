@@ -7,7 +7,4 @@ if not exist "%PYTHON_PATH%" (
 set SCRIPT_PATH=stop.py
 "%PYTHON_PATH%" "%SCRIPT_PATH%"
 
-set SCRIPT_PATH=main.py
-"%PYTHON_PATH%" "%SCRIPT_PATH%"
-
 pause

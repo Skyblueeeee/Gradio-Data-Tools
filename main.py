@@ -4,6 +4,9 @@ import gradio as gr
 import shutil
 import GPUtil
 import multiprocessing
+import threading
+from threading import Event
+import signal
 
 from scripts.datatools_calimgs.coco_label import print_statistics
 from scripts.datatools_augimgs.COCO_ImageAugWithBox import image_aug,image_dir_aug,check_dir
@@ -20,8 +23,18 @@ from scripts.datatools_fiftyone.constructflow import GRConstuctFlow
 from scripts.datatools_fiftyone.constructflow import db_tags,send_image
 from scripts.datatools_fiftyone.fiftyone_app import fiftyone_start
 from scripts.datatools_fiftyone.fiftyone_dir.construct_flow import ConstructFlow
+from log.log import flow_api
 
 css = "ui/style.css"
+
+def pid_init():
+    pidd = "log/pid"
+    if not os.path.isdir(pidd):
+        os.makedirs(pidd)
+    # if len(os.listdir(pidd)) == 0:
+    with open(f"log/pid/{os.getpid()}", "w") as fp:
+        fp.write("")
+
 
 class GradioDataTools():
     def __init__(self) -> None:
@@ -33,10 +46,11 @@ class GradioDataTools():
         self.md = "README.md"
         self.log_path = "log/gdt_log.log"
         self.root_model_path = "scripts/datatools_labeling/models"
+        self.event = Event()
 
         # 加载51
         fiftyone_start()
-    
+    @flow_api
     def init_model_dir(self):
         model_list = []
         for dir in os.listdir(self.root_model_path):
@@ -44,6 +58,7 @@ class GradioDataTools():
                 model_list.append(dir)
         return model_list
     
+    @flow_api
     def get_gpu_info(self):
         try:
             gpus = GPUtil.getGPUs()
@@ -52,36 +67,40 @@ class GradioDataTools():
             for gpu in gpus:
                 gpu_name = f"GPU {gpu.id}"
                 if gpu.memoryUsed / gpu.memoryTotal < 0.7:
-                    less_than_70_list.append(gpu_name)
+                    if gpu_name != "GPU 0":
+                        less_than_70_list.append(gpu_name)
             
             return less_than_70_list
         
         except Exception as e:
             print("获取显卡信息失败:", e)
             return ["GPU erro"]
-
+   
+    @flow_api
     def update_title(self,value):
         return gr.HTML.update(f"""<h1 align="center">{value}</h1>""")
-
+    
+    @flow_api
     def add_name(self,name):
         if name !="":
             if name not in self.name_list:
                 self.name_list.append(name)
         return gr.Dropdown.update(choices=self.name_list)
-
+    
     def log_md(self):
         with open(self.md, 'r', encoding='utf-8') as file:
             md_text = file.read()
 
         return md_text
-
+    
     def open_folder(self,folder_path):
         if os.path.exists(folder_path):
             return gr.Button.update(link=folder_path)
-
+    
     def image_info(self,display):
         return display
-
+    
+    @flow_api
     def _ff_build(self,ff_imagedir_input,ff_input_imgdir_rule,ff_dbname_input,ff_json_input10,ff_json_input1,
                 ff_json_input2,ff_json_input3,ff_json_input4,ff_json_input5,
                 ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe):
@@ -96,18 +115,21 @@ class GradioDataTools():
             return "Fiftyone数据库任务已完成!"
         else:
             return "路径不存在，请检查！暂只支持数据中心(125/39/184服务器),不支持个人本机数据。"
-
+    
+    @flow_api
     def add_super_caty(self,defau):
         if defau not in self.super and defau != "":
             self.super.append(defau)
         return gr.Dropdown.update(choices=self.super)
-
+    
+    @flow_api
     def add_warmup(self,num,epoch,bs):
         w1 = int(num) * int(epoch) // int(bs) * 0.05
         w2 = int(num) * int(epoch) // int(bs) * 0.1
 
         return str(w1)+"---"+str(w2)
-        
+    
+    @flow_api
     def plot_forecast(self,final_year, companies, noise, show_legend, point_style="circle"):
         import matplotlib.pyplot as plt
         start_year = 2020
@@ -124,24 +146,27 @@ class GradioDataTools():
         if show_legend:
             plt.legend(companies)
         return fig
-
+    
+    @flow_api
     def update_box(self,a,b):
         if a == False and b == True:
             return gr.Accordion.update(open=True,visible=True)
         else:
             return gr.Accordion.update(open=False,visible=False)
     
+    @flow_api
     def update_accordion(self,a):
         if a == True:
             return gr.Accordion.update(open=True,visible=True)
         else:
             return gr.Accordion.update(open=False,visible=False)
-    
+
     def update_log(self,a):
         if a:
             with open(self.log_path, 'r') as f:
                 return f.read()
-
+    
+    @flow_api
     def labeling_copy_files(self,file, model_name):
         model_dir = r"scripts\datatools_labeling\models"
         new_model_dir = os.path.join(model_dir,model_name)
@@ -155,10 +180,11 @@ class GradioDataTools():
             shutil.copy(fi.name, new_model_dir)
         
         return f" {model_name} 模型已成功上传！"
-
+    
+    @flow_api
     def labeling_update_drop(self):
         return gr.Dropdown.update(choices=self.init_model_dir()),gr.Dropdown.update(choices=self.get_gpu_info())
-    
+
     def file_info(self,dir):
         ck = None
         cf = None
@@ -169,7 +195,8 @@ class GradioDataTools():
                 cf = os.path.join(dir,file)
         # print(ck,cf)
         return ck,cf
-
+    
+    @flow_api
     def labeling_model_init(self,model_name,gpus):
         if model_name == "" or gpus == "":
             return "请选择模型/显卡"
@@ -183,52 +210,23 @@ class GradioDataTools():
         self.mminfer.model_init(config, checkpoint, device)
 
         return f"{model_name} 模型初始化已完成"
-
-    def labeling_model_init1(self,model_name,gpus):
-        if model_name == "" or gpus == "":
-            return "请选择模型/显卡"
-        device = "cuda:"+gpus[-1]
-        model_dir1 = os.path.join(self.root_model_path,model_name)
-        checkpoint,config = self.file_info(model_dir1)
-        if checkpoint == None or config == None:
-            return "配置文件不完整，模型无法启动"
-        
-        if not self.init_mm_mode:
-            self.process_initmodel = multiprocessing.Process(target=self._labeling_model_init1,args=[config,checkpoint,device])
-            self.process_initmodel.start()
-            # self.process_initmodel.join()
-            self.init_mm_mode = True
-            return f"{model_name} 模型初始化已完成"
-        elif self.process_initmodel.is_alive():
-            return "已有模型初始化完成"
     
-    def _labeling_model_init1(self,config,checkpoint,device):
-        try:
-            while True:
-                self.mminfer = MM_Infer_Labeling()
-                self.mminfer.model_init(config, checkpoint, device)
-        except Exception as e:
-            print(f"模型初始化发生异常: {e}")
-
-    def labeling_model_init_stop1(self):
-        if self.init_mm_mode:
-            if self.process_initmodel.is_alive():
-                self.process_initmodel.terminate()
-                self.init_mm_mode = False
-                return "已停止初始化模型"
-            else:
-                return "模型初始化失败"
-        else:
-            return "未有模型初始化"
-        
+    @flow_api 
     def labeling_model_init_stop(self):
 
         return "未加该功能"
-
+    
+    @flow_api
     def labeling_model_infer(self,data_path,score,outfilemode):
         self.mminfer.model_infer(data_path,float(score),outfilemode)
 
         return f"AI预标注 {data_path} 已完成"
+    
+    @flow_api
+    def labeling_model_single_infer(self,imgs,score):
+        result,res_image =  self.mminfer.model_single_infer(imgs,float(score))
+
+        return f"该图算法结果为：{result}",res_image
 
     def gr_ui(self):
         with gr.Blocks(theme=gr.themes.Soft(),title="Gradio-Data-Tools",css=css) as demo:
@@ -347,13 +345,18 @@ class GradioDataTools():
                 ok_btn.click(self.add_warmup,inputs=[imgs_num,epoch,bs],outputs=warmup)
             
             with gr.Tab("AI预标注"):
+                gr.Markdown('''
+                    1.默认生成via_infer.json与coco_label.json，预标注前请检查数据路径下的json文件是否重名！
+
+                    2.由于部署原因，暂只支持数据中心(125/39/184服务器)，不支持个人本机数据。
+                ''')
                 import datetime
                 labeling_acc = gr.Accordion(label="请将配置文件与模型文件需同时上传(目前仅支持MMDET)",visible=False,open=False)
                 with labeling_acc:
                     with gr.Row():
                         txt_model_name = gr.Text("",label="模型名称",info="为自己上传的模型起个名字",scale=5)
                         btn_labeling_upload = gr.Button("上传")
-                    labeling_file = gr.Files(label="模型上传(uploading结束后上传)")
+                    labeling_file = gr.Files(label="模型上传(uploading结束后再上传)")
                 with gr.Row():
                     drop_labeling_mn = gr.Dropdown(self.init_model_dir(),label="模型选择",scale=2)
                     drop_labeling_gpu = gr.Dropdown(self.get_gpu_info(),label="显卡选择",scale=1)
@@ -361,11 +364,17 @@ class GradioDataTools():
                     btn_labeling_init = gr.Button("启动",scale=1)
                     btn_labeling_stop = gr.Button("停止",scale=1)
                     rad_labeling_upload_model = gr.Radio([True,False],value=False,label="上传模型",scale=1)
-                with gr.Row():
-                    labeling_input_data = gr.Text("",label="数据路径",scale=4)
-                    txt_labeling_input_score = gr.Text("0.9",label="阈值",scale=1)
-                    rad_outfile = gr.Radio(["ALL"],value = "ALL",label="生成JSON文件",scale=1)
-                btn_labeling_ok = gr.Button("开始标注",variant="primary")
+                with gr.Tab("预标注"):
+                    with gr.Row():
+                        labeling_input_data = gr.Text("",label="数据路径",scale=4)
+                        txt_labeling_input_score = gr.Text("0.9",label="阈值",scale=1)
+                        rad_outfile = gr.Radio(["ALL"],value = "ALL",label="生成JSON文件",scale=1)
+                    btn_labeling_ok = gr.Button("开始标注",variant="primary")
+                with gr.Tab("在线使用"):
+                    with gr.Row():
+                        input_imgs = gr.Image(label="上传图片")
+                        output_imgs = gr.Image(label="结果图片")
+                    btn_labeling_infer = gr.Button("开始推理",variant="primary")
                 with gr.Row():
                     ################### 隐藏显示 ##############################
                     datetimestr = datetime.datetime.now()
@@ -384,15 +393,17 @@ class GradioDataTools():
                     labeling_json_input7 = gr.Radio([True,False],value=False,label = "删除数据库",info="可以选择初始化数据库覆盖，或者选择删除",scale=2,visible=False)
                     labeling_json_input8 = gr.Radio(["equal","in","all"],value="equal",label = "删除模式",info="equal删除全称 in删除包含 all删除全部",scale=2,visible=False)
                     ############################################################
-
+                
+                with gr.Row():
                     btn_labeling_ruku = gr.Button("一键入库",variant="primary")
                     btn_labeling_fenxi = gr.Button("一键分析",variant="primary")
+                
                 txt_labeling_info_output = gr.Text("",label="结果输出",lines=5,max_lines=5)
 
                 rad_labeling_upload_model.change(self.update_accordion,inputs=rad_labeling_upload_model,outputs=labeling_acc)
                 btn_labeling_upload.click(self.labeling_copy_files,inputs=[labeling_file,txt_model_name],outputs=[txt_labeling_info_output])
                 btn_labeling_f5.click(self.labeling_update_drop,inputs=None,outputs=[drop_labeling_mn,drop_labeling_gpu])
-                drop_labeling_mn.change(fn = None,inputs=drop_labeling_mn,outputs=drop_labeling_mn)
+                drop_labeling_mn.change(fn=None,inputs=drop_labeling_mn,outputs=drop_labeling_mn)
                 drop_labeling_gpu.change(fn=None,inputs=drop_labeling_gpu,outputs=drop_labeling_gpu)
 
                 btn_labeling_init.click(self.labeling_model_init,inputs=[drop_labeling_mn,drop_labeling_gpu],outputs=txt_labeling_info_output)
@@ -402,6 +413,7 @@ class GradioDataTools():
                                                             labeling_json_input2,labeling_json_input3,labeling_json_input4,labeling_json_input5,
                                                             labeling_json_input6,labeling_json_input7,labeling_json_input8,labeling_json_input9,labeling_json_input_uniqe],outputs=txt_labeling_info_output)
                 btn_labeling_fenxi.click(print_statistics,inputs=[labeling_input_data,cal_input_imgdir_rule],outputs=[cal_info_df,imgs_num,gr_scatter_plot,gr_line_plot,gr_bar_plot])
+                btn_labeling_infer.click(self.labeling_model_single_infer,inputs=[input_imgs,txt_labeling_input_score],outputs=[txt_labeling_info_output,output_imgs])
 
             with gr.Tab("数据增强"):
                 gr.Markdown("""
@@ -550,9 +562,11 @@ class GradioDataTools():
 
                 log_radio.change(fn=self.update_accordion,inputs=log_radio,outputs=log_txt_acc)
                 log_radio.change(fn=self.update_log,inputs=log_radio,outputs=log_txt,every=1)
+
         return demo
 
 if __name__ == "__main__":
     gt = GradioDataTools()
     demo = gt.gr_ui()
+    pid_init()
     demo.queue(150).launch(server_name='10.10.1.129',server_port=8001,share=False,show_api=False)

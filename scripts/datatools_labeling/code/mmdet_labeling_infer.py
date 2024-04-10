@@ -1,12 +1,42 @@
+import cv2
 import os, json, time
+import numpy as np
 from PIL import Image
 from mmdet.apis import inference_detector, init_detector
 from scripts.datatools_viajson.via2coco import run_viatococo
+
+def file_info(dir):
+    ck = None
+    cf = None
+    for file in os.listdir(dir):
+        if file.endswith(".pth"):
+            ck = os.path.join(dir,file)
+        elif file.endswith(".py"):
+            cf = os.path.join(dir,file)
+    # print(ck,cf)
+    return ck,cf
+def read_images(image_path):
+    with open(image_path, 'rb') as f:
+        img_bytes = f.read()
+    img_array = np.frombuffer(img_bytes, np.uint8)
+    image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    return image
+
+dirs = r"scripts\datatools_labeling\models\lantu_yb_hec"
+checkpoint,config = file_info(dirs)
 
 class MM_Infer_Labeling():
     def __init__(self) -> None:
         self.super_category = "default"
         self.via_name = "via_infer"
+        # self.model_init(config=config,checkpoint=checkpoint,device="cuda:1")
+    def pid_init(self):
+        pidd = "log/pid"
+        if not os.path.isdir(pidd):
+            os.makedirs(pidd)
+        # if len(os.listdir(pidd)) == 0:
+        with open(f"log/pid/{os.getpid()}", "w") as fp:
+            fp.write("")
 
     def json_init(self):
         pro_json = {
@@ -68,16 +98,17 @@ class MM_Infer_Labeling():
         }
         return pro_json
 
-    def file_info(self,dir):
-        ck = None
-        cf = None
-        for file in os.listdir(dir):
-            if file.endswith(".pth"):
-                ck = os.path.join(dir,file)
-            elif file.endswith(".py"):
-                cf = os.path.join(dir,file)
-        # print(ck,cf)
-        return ck,cf
+    def draw_boxes(self,image, labels):
+        for label, info in labels.items():
+            threshold, x, y, w, h = info
+            x, y, w, h = int(x), int(y), int(w), int(h)
+            color = (255, 0, 0)
+            cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
+            cv2.putText(image, f"{label} {threshold:.2f}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        return image
+
+    def model_infer_sever(self,config,checkpoint,device,image,score_th):
+        res,res_img = self.model_single_infer(image,score_th)
 
     def model_init(self,config,checkpoint,device):
         self.model = init_detector(config, checkpoint, device=device)
@@ -145,14 +176,23 @@ class MM_Infer_Labeling():
             with open(os.path.join(project_save_path), "w", encoding="utf-8") as fp:
                 json.dump(pro_json, fp, ensure_ascii=False, indent=4)
 
+    def model_single_infer(self,imgs,score_th):
+        res = {}
+        result = inference_detector(self.model, imgs)
+        for i in range(len(result)):
+            class_name = self.model.CLASSES[i]
+            for each_bbox_info in result[i]:
+                x1, y1, x2, y2, score = each_bbox_info.tolist() 
+                if score >= score_th:
+                    res[class_name] = [score,round(x1, 2),round(y1, 2),round(x2 - x1, 2), round(y2 - y1, 2)]
+        res_img = self.draw_boxes(imgs,res)
+        return res,res_img
     
 if __name__ == "__main__":
-    model_dir = r"lantu_yb_hec"
-    gpu = "gpu 0"
-    image_dir = r"D:\test\仪表数据"
+    image_dir = r"D:\test\仪表数据\仪表台_20231127_HJK_XRVALPAHJKAKC00000_LDP95H96XPE310436_01_1.jpg"
+    image = read_images(image_dir)
     mminfer = MM_Infer_Labeling()
-    # device = "cuda:"+gpus[-1]
-    # model_dir1 = os.path.join(self.root_model_path,model_dir)
-    # checkpoint,config = self.file_info(model_dir1)
-    # if checkpoint == None or checkpoint == None:
-    #     print("配置文件不完整，模型无法启动")()
+    res,res_imgs = mminfer.model_single_infer(image,0.9)
+    cv2.imshow('Image with Boxes', res_imgs)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()

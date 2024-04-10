@@ -1,14 +1,28 @@
-2024-03-05 10:26:56,650 - Gradio-Data-Tools
-2024-03-05 10:26:56,650 - Starting Gradio-Data-Tools Server...
-2024-03-05 10:26:56,650 - Point your web browser to http://10.10.1.129:8001/
-2024-03-05 10:26:56,650 - G-D-T Server��Fiftyone Initializing the database...
-2024-03-05 10:27:06,925 - G-D-T Server: FiftyOne Server Running...
-2024-03-05 10:27:07,039 - G-D-T Server: Connected to FiftyOne on port 8003 at 10.10.1.129.
-2024-03-05 10:27:07,149 - G-D-T Server: If you are not connecting to a remote session, you may need to start a new session and specify a port
-2024-03-05 10:27:07,618 - G-D-T Server: App launched. Point your web browser to http://localhost:8003
-2024-03-05 10:27:07,905 - G-D-T Server: FiftyOne Server Startup Complete!
-2024-03-05 10:29:09,381 - G-D-T Server: Running on local URL:  http://10.10.1.129:8000
-2024-03-05 10:29:09,607 - G-D-T Server: To create a public link, set `share=True` in `launch()`.
-2024-03-05 10:29:09,717 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.02s
-2024-03-05 10:29:09,941 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.01s
-2024-03-05 10:29:10,163 - G-D-T Server: Fiftyone Runing init_dataset Finished Time 0.01s
+2024-03-28 15:08:31,029 - Gradio-Data-Tools
+2024-03-28 15:08:31,030 - Starting Gradio-Data-Tools Server...
+2024-03-28 15:08:31,030 - Point your web browser to http://10.10.1.129:8001/
+2024-03-28 15:08:31,030 - G-D-T Server��Fiftyone Initializing the database...
+2024-03-28 15:09:08,921 - G-D-T Server: FiftyOne Server Running...
+2024-03-28 15:09:09,134 - G-D-T Server: Could not connect session, trying again in 10 seconds
+2024-03-28 15:09:09,356 - G-D-T Server: App launched. Point your web browser to http://localhost:8003
+2024-03-28 15:09:09,504 - G-D-T Server: FiftyOne Server Startup Complete!
+2024-03-28 15:09:09,609 - G-D-T Server: Gradio-Data-Tools Running init_model_dir Finished Time 0.00s
+2024-03-28 15:09:09,831 - G-D-T Server: Gradio-Data-Tools Running get_gpu_info Finished Time 0.22s
+2024-03-28 16:59:39,250 - INFO - Gradio-Data-Tools
+2024-03-28 16:59:39,251 - INFO - Starting Gradio-Data-Tools Server...
+2024-03-28 16:59:39,252 - INFO - Please point your web browser to http://10.10.1.129:8001/
+2024-03-28 16:59:39,252 - INFO - G-D-T Server: Initializing Fiftyone database...
+2024-03-28 17:00:15,341 - INFO - G-D-T Server: FiftyOne Server Running...
+2024-03-28 17:00:15,448 - INFO - G-D-T Server: App launched. Point your web browser to http://localhost:8003
+2024-03-28 17:00:15,887 - INFO - G-D-T Server: FiftyOne Server Startup Complete!
+2024-03-28 17:00:15,999 - INFO - G-D-T Server: Gradio-Data-Tools Running init_model_dir Finished Time 0.00s
+2024-03-28 17:00:16,220 - INFO - G-D-T Server: Gradio-Data-Tools Running get_gpu_info Finished Time 0.21s
+2024-03-28 17:00:16,440 - INFO - G-D-T Server: D:\shy_code\tools_develop\python_env\py38_gdt\lib\site-packages\gradio_client\documentation.py:102: UserWarning: Could not get documentation group for <class 'gradio.mix.Parallel'>: No known documentation group for module 'gradio.mix'
+2024-03-28 17:00:16,551 - INFO - G-D-T Server: warnings.warn(f"Could not get documentation group for {cls}: {exc}")
+2024-03-28 17:00:16,663 - INFO - G-D-T Server: D:\shy_code\tools_develop\python_env\py38_gdt\lib\site-packages\gradio_client\documentation.py:102: UserWarning: Could not get documentation group for <class 'gradio.mix.Series'>: No known documentation group for module 'gradio.mix'
+2024-03-28 17:00:16,774 - INFO - G-D-T Server: warnings.warn(f"Could not get documentation group for {cls}: {exc}")
+2024-03-28 17:09:09,931 - ERROR - Gradio-Data-Tools Server Failed To Start!
+2024-03-28 17:09:09,942 - INFO - Gradio-Data-Tools
+2024-03-28 17:09:09,942 - INFO - Starting Gradio-Data-Tools Server...
+2024-03-28 17:09:09,943 - INFO - Please point your web browser to http://10.10.1.129:8001/
+2024-03-28 17:09:09,943 - INFO - G-D-T Server: Initializing Fiftyone database...

@@ -162,7 +162,7 @@ class GRConstuctFlow(ff.ConstructFlow):
             for group in os.walk(origin_dir):
                 if imgdir_rule in group[0]:
                     for each_file in os.listdir(group[0]):
-                        if "via" in each_file and via_coco_mode == "VIA":
+                        if "via_poject" in each_file and via_coco_mode == "VIA":
                             via_path = os.path.join(group[0],each_file)
                             print(f"Fiftyone Runing {via_path} Valid Images")
                             self.merge(
@@ -215,7 +215,7 @@ class GRConstuctFlow(ff.ConstructFlow):
             for group in os.walk(origin_dir):
                 if imgdir_rule in group[0]:
                     for each_file in os.listdir(group[0]):
-                        if "via" in each_file and each_file.endswith(".json"):
+                        if "via_project" in each_file and each_file.endswith(".json"):
                             label_path = os.path.join(group[0], each_file)
                             print(f"Fiftyone Runing {label_path} labels")
                             self.merge_labels(

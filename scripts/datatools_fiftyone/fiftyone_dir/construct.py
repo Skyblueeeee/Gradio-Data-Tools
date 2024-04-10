@@ -99,7 +99,7 @@ class ViaLabelImporter(FitowBaseLabelImporter):
         for each_img_info in self.via_file.via_imgs.values():
             if "width" not in each_img_info:
                 image = cv2.imdecode(np.fromfile(os.path.join(self.data_path, each_img_info['filename']), dtype=np.uint8),-1)
-                img_h,img_w,_ = image.shape
+                img_h,img_w= image.shape
             else:
                 img_w, img_h = each_img_info["width"], each_img_info["height"]
             regions = each_img_info["regions"]

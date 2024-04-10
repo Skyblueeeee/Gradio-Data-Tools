@@ -28,11 +28,11 @@ def flow_api(CF_fun):
             result = CF_fun(self, *args, **kwargs)
         except Exception as e:
             tock = time.time()
-            print("Fiftyone Runing " + CF_fun.__name__ + f" Finished Time {(tock - tick):.2f}s", end="\n\n")
+            print("Fiftyone Running " + CF_fun.__name__ + f" Finished Time {(tock - tick):.2f}s", end="\n\n")
             raise e
         else:
             tock = time.time()
-            print("Fiftyone Runing " + CF_fun.__name__ + f" Finished Time {(tock - tick):.2f}s", end="\n\n")
+            print("Fiftyone Running " + CF_fun.__name__ + f" Finished Time {(tock - tick):.2f}s", end="\n\n")
             return result
     return wrapper
 
