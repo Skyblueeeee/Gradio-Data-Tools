@@ -3,7 +3,6 @@
 本平台主要基于Gradio Python库构建，旨在为用户提供一个通用、高效的脚本执行环境。作为模型训练的第一站，我们支持多人多任务同时操作，确保工作效率最大化。
 
 <center><b>Gradio</b> <a href="https://www.gradio.app/"> ✨✨ </a> ｜  <b>FiFtyone</b> <a href="https://github.com/voxel51/fiftyone"> ✨✨ </a>&nbsp;｜ <b>MMDET</b> <a href="https://github.com/open-mmlab/mmdetection"> ✨✨</a>&nbsp;｜ <b>Github</b> <a href="https://github.com/Skyblueeeee/Gradio-Data-Tools"> ✨✨</a>&nbsp; </center>
-
 ## 核心功能特色:
 
 **✦Fiftyone数据管理**：灵活导入数据，实现数据库的精细化管理。支持数据的导出、删除，以及有效与空图的快速检查。标签校验与发标注图等任务一键完成。
@@ -24,6 +23,10 @@
 
 ### 待定功能
 【数据管理】[入库模式]增加TXT格式。
+
+### 20240426-更新功能
+
+【JSON互转】增加mask的json互转。
 
 ### 20240312-更新功能
 
@@ -85,7 +88,3 @@ PYTHON_PATH=..\python_env\py38_gdt\python.exe
 ```
 
 4.双击启动!
-
-# ✦✦✦ slogan ✦✦✦
-
-## "数据是深度学习的燃料，算法是引擎，模型是车辆，而深度学习则是驾驶这辆车的人。"

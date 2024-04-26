@@ -16,6 +16,8 @@ from scripts.datatools_viajson.coco2via import main_coco2via
 from scripts.datatools_viajson.coco2yolo import coco_to_txt
 from scripts.datatools_viajson.yolo_to_via_project import run_yolo2via
 from scripts.datatools_viajson.via_get_labels import run_quqian
+from scripts.datatools_viajson.mask_viacoco import convertMASK_VIA2COCO
+from scripts.datatools_viajson.mask_viacoco import convertMASK_COCO2VIA
 
 from scripts.datatools_labeling.code.mmdet_labeling_infer import MM_Infer_Labeling
 
@@ -432,7 +434,7 @@ class GradioDataTools():
                         ml1 = gr.Slider(minimum=-1, maximum=1, value=0.8, interactive=True,label="明亮度1")
                         ml2 = gr.Slider(minimum=0, maximum=2, value=1.2, interactive=True,label="明亮度2")
 
-                    flip = gr.Slider(minimum=0, maximum=1, value=0, step=0.01, interactive=True,label="翻转")
+                    flip = gr.Slider(minimum=0, maximum=1, value=0, step=0.01, interactive=True,label="水平翻转")
                     count = gr.Slider(minimum=1, maximum=50, value=1, step=1, interactive=True,label="增强次数")
                 with gr.Tab("单张数据增强"):
                     with gr.Row():
@@ -497,62 +499,93 @@ class GradioDataTools():
                 get_imgs_input5.change(fn=self.update_box,inputs=[get_imgs_input9,get_imgs_input5],outputs=img_info)
                 get_imgs_btm.click(run_quqian,inputs=[get_imgs_input1,get_imgs_input7,get_imgs_input6,get_imgs_input2,get_imgs_input3,get_imgs_input4,get_imgs_input5,get_imgs_input8,get_imgs_input9,get_imgs_input10,get_imgs_input11],outputs=get_imgs_info)
 
-            with gr.Tab("JSON互转"):
+            with gr.Tab("JSON互转(box/mask)"):
                 gr.Markdown("""
                             1.请先确认json文件是否存在，注意名称不需要填写‘.json’。
 
                             2.由于部署原因，暂只支持数据中心(125/39/184服务器),不支持个人本机数据。
                             """)
-                with gr.Tab("via2coco"):
-                    with gr.Column():
-                        with gr.Row():
-                            json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="生成的coco格式可支持mmdet训练",max_lines=7,lines=7)
-                            with gr.Column():
-                                with gr.Row():
-                                    json_vianame_input1 = gr.Textbox("via_project",label = "project名称",info="不需要输入'.json")
-                                    json_coconame_input1 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'")
-                                with gr.Row():
-                                    json_supercategory_input1 = gr.Dropdown(choices=self.super,value=self.super[0],label = "模板名称")
-                                    super_text = gr.Textbox(label="添加模板")
-                                    super_btn = gr.Button("添加",icon=self.refresh_icon_path)
-                            
-                        json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
-                        json_vc_ok_button = gr.Button("确认",variant="primary")
-                    super_btn.click(self.add_super_caty,inputs=[super_text],outputs=[json_supercategory_input1])
-                    json_supercategory_input1.change(fn=None,inputs=[json_supercategory_input1],outputs=[json_supercategory_input1])
-                json_vc_ok_button.click(run_viatococo,inputs=[json_dir_input,json_vianame_input1,json_coconame_input1,json_supercategory_input1],outputs=json_info_output)
+                with gr.Tab("BOX"):
+                    with gr.Tab("via2coco"):
+                        with gr.Column():
+                            with gr.Row():
+                                json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="生成的coco格式可支持mmdet训练",max_lines=7,lines=7)
+                                with gr.Column():
+                                    with gr.Row():
+                                        json_vianame_input1 = gr.Textbox("via_project",label = "project名称",info="不需要输入'.json")
+                                        json_coconame_input1 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'")
+                                    with gr.Row():
+                                        json_supercategory_input1 = gr.Dropdown(choices=self.super,value=self.super[0],label = "模板名称")
+                                        super_text = gr.Textbox(label="添加模板")
+                                        super_btn = gr.Button("添加",icon=self.refresh_icon_path)
+                                
+                            json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
+                            json_vc_ok_button = gr.Button("确认",variant="primary")
+                        super_btn.click(self.add_super_caty,inputs=[super_text],outputs=[json_supercategory_input1])
+                        json_supercategory_input1.change(fn=None,inputs=[json_supercategory_input1],outputs=[json_supercategory_input1])
+                    json_vc_ok_button.click(run_viatococo,inputs=[json_dir_input,json_vianame_input1,json_coconame_input1,json_supercategory_input1],outputs=json_info_output)
 
-                with gr.Tab("coco2via"):
-                    with gr.Column():
-                        with gr.Row():
-                            json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="输入图片地址，内有json文件，生成后的via文件可通过html打开",scale=5)
-                            json_coconame_input2 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'",scale=1)
-                            json_vianame_input2 = gr.Textbox("via_project",label = "via名称",info="不需要输入'.json'",scale=1)
-                            json_supercategory_input2 = gr.Dropdown(["fitow","default"],label = "模板名称",info="不输入,默认为fitow",scale=1)
-                        json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
-                        json_cv_ok_button = gr.Button("确认",variant="primary")
-                json_cv_ok_button.click(main_coco2via,inputs=[json_dir_input,json_coconame_input2,json_vianame_input2,json_supercategory_input2],outputs=json_info_output)
+                    with gr.Tab("coco2via"):
+                        with gr.Column():
+                            with gr.Row():
+                                json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="输入图片地址，内有json文件，生成后的via文件可通过html打开",scale=5)
+                                json_coconame_input2 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'",scale=1)
+                                json_vianame_input2 = gr.Textbox("via_project",label = "via名称",info="不需要输入'.json'",scale=1)
+                                json_supercategory_input2 = gr.Dropdown(["fitow","default"],label = "模板名称",info="不输入,默认为fitow",scale=1)
+                            json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
+                            json_cv_ok_button = gr.Button("确认",variant="primary")
+                    json_cv_ok_button.click(main_coco2via,inputs=[json_dir_input,json_coconame_input2,json_vianame_input2,json_supercategory_input2],outputs=json_info_output)
 
-                with gr.Tab("coco2yolo"):
-                    with gr.Column():
+                    with gr.Tab("coco2yolo"):
+                        with gr.Column():
+                            with gr.Row():
+                                json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="输入图片地址，内有coco文件",scale=5)
+                                json_coconame_input2 = gr.Textbox("via_export_coco",label = "COCO名称",info="不需要输入'.json'",scale=1)
+                            json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
+                            json_cy_ok_button = gr.Button("确认",variant="primary")
+                    json_cy_ok_button.click(coco_to_txt,inputs=[json_dir_input,json_coconame_input2],outputs=json_info_output)
+                
+                    with gr.Tab("yolo2via"):
                         with gr.Row():
-                            json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="输入图片地址，内有coco文件",scale=5)
-                            json_coconame_input2 = gr.Textbox("via_export_coco",label = "COCO名称",info="不需要输入'.json'",scale=1)
-                        json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
-                        json_cy_ok_button = gr.Button("确认",variant="primary")
-                json_cy_ok_button.click(coco_to_txt,inputs=[json_dir_input,json_coconame_input2],outputs=json_info_output)
-               
-                with gr.Tab("yolo2via"):
-                    with gr.Row():
-                        json_yc_input_text = gr.Text(self.label_path,label="数据地址",scale=5)
-                        json_yc_input_vianame = gr.Text("via_project",label="VIA名称",scale=1)
-                        json_yc_input_super = gr.Dropdown(choices=self.super,value=self.super[0],label = "模板名称",scale=1)
-                        super_yc_text = gr.Textbox(label="添加模板",scale=1)
-                        superyc__btn = gr.Button("添加",icon=self.refresh_icon_path,scale=1)
-                    json_yc_input_df = gr.DataFrame(label="标注模板",headers=["算法标签", "中文名称"],datatype=["str", "str"],row_count=5,col_count=(2, "fixed"))
-                    json_yc_info_output = gr.Textbox(label = "输出信息",lines=5,max_lines=5)
-                    json_yc_ok_button = gr.Button("确认",variant="primary")
-                json_yc_ok_button.click(run_yolo2via,inputs=[json_yc_input_text,json_yc_input_vianame,json_yc_input_super,json_yc_input_df],outputs=json_yc_info_output)
+                            json_yc_input_text = gr.Text(self.label_path,label="数据地址",scale=5)
+                            json_yc_input_vianame = gr.Text("via_project",label="VIA名称",scale=1)
+                            json_yc_input_super = gr.Dropdown(choices=self.super,value=self.super[0],label = "模板名称",scale=1)
+                            super_yc_text = gr.Textbox(label="添加模板",scale=1)
+                            superyc__btn = gr.Button("添加",icon=self.refresh_icon_path,scale=1)
+                        json_yc_input_df = gr.DataFrame(label="标注模板",headers=["算法标签", "中文名称"],datatype=["str", "str"],row_count=5,col_count=(2, "fixed"))
+                        json_yc_info_output = gr.Textbox(label = "输出信息",lines=5,max_lines=5)
+                        json_yc_ok_button = gr.Button("确认",variant="primary")
+                    json_yc_ok_button.click(run_yolo2via,inputs=[json_yc_input_text,json_yc_input_vianame,json_yc_input_super,json_yc_input_df],outputs=json_yc_info_output)
+                with gr.Tab("MASK"):
+                    with gr.Tab("via2coco"):
+                        with gr.Column():
+                            with gr.Row():
+                                json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="生成的coco格式可支持mmdet训练",max_lines=7,lines=7)
+                                with gr.Column():
+                                    with gr.Row():
+                                        json_vianame_input1 = gr.Textbox("via_project",label = "project名称",info="不需要输入'.json")
+                                        json_coconame_input1 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'")
+                                    with gr.Row():
+                                        json_supercategory_input1 = gr.Dropdown(choices=self.super,value=self.super[0],label = "模板名称")
+                                        super_text = gr.Textbox(label="添加模板")
+                                        super_btn = gr.Button("添加",icon=self.refresh_icon_path)
+                                
+                            json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
+                            json_vc_ok_button = gr.Button("确认",variant="primary")
+                        super_btn.click(self.add_super_caty,inputs=[super_text],outputs=[json_supercategory_input1])
+                        json_supercategory_input1.change(fn=None,inputs=[json_supercategory_input1],outputs=[json_supercategory_input1])
+                    json_vc_ok_button.click(convertMASK_VIA2COCO,inputs=[json_dir_input,json_vianame_input1,json_coconame_input1,json_supercategory_input1],outputs=json_info_output)
+                    
+                    with gr.Tab("coco2via"):
+                        with gr.Column():
+                            with gr.Row():
+                                json_dir_input = gr.Textbox(self.label_path,label = "输入地址",info="输入图片地址，内有json文件，生成后的via文件可通过html打开",scale=5)
+                                json_coconame_input2 = gr.Textbox("coco",label = "COCO名称",info="不需要输入'.json'",scale=1)
+                                json_vianame_input2 = gr.Textbox("via_project",label = "via名称",info="不需要输入'.json'",scale=1)
+                                json_supercategory_input2 = gr.Dropdown(["fitow","default"],label = "模板名称",info="不输入,默认为fitow",scale=1)
+                            json_info_output = gr.Textbox(label = "输出信息",lines=15,max_lines=15)
+                            json_cv_ok_button = gr.Button("确认",variant="primary")
+                    json_cv_ok_button.click(convertMASK_COCO2VIA,inputs=[json_dir_input,json_vianame_input2,json_coconame_input2,json_supercategory_input2],outputs=json_info_output)
 
             with gr.Tab("其他"):
                 log_radio = gr.Radio([True,False],value=False,label="日志查看")
