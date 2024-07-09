@@ -46,16 +46,25 @@ def print_statistics(root_dir,rule):
                         categoryStatusDict[catName] = tempIndex
                         new_dict[eachlabel] = ""
 
+                    # for eachAnnotation in annotations:
+                    #     catName = catDict[eachAnnotation["category_id"]]
+                    #     tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
+                    #     tempIndex[1] += 1
+                    #     if isinstance(eachAnnotation["image_id"],str):
+                    #         imgs_id = int(eachAnnotation["image_id"])
+                    #         tempIndex[2].add(imgDict[imgs_id])
+                    #     else:
+                    #         tempIndex[2].add(eachAnnotation["image_id"])
+
+                    #     categoryStatusDict[catName] = tempIndex
+
                     for eachAnnotation in annotations:
                         catName = catDict[eachAnnotation["category_id"]]
                         tempIndex = categoryStatusDict.get(catName, [catName, 0, set()])
                         tempIndex[1] += 1
-                        if isinstance(eachAnnotation["image_id"],str):
-                            imgs_id = int(eachAnnotation["image_id"])
-                            tempIndex[2].add(imgDict[imgs_id])
-                        else:
-                            tempIndex[2].add(eachAnnotation["image_id"])
-
+                        # 修正：直接使用usageImgSet来添加图片ID
+                        usageImgSet.add(imgDict[eachAnnotation["image_id"]])
+                        tempIndex[2].add(imgDict[eachAnnotation["image_id"]])
                         categoryStatusDict[catName] = tempIndex
 
                 # if "via_" in each_file and each_file.endswith(".json"):
@@ -76,12 +85,14 @@ def print_statistics(root_dir,rule):
                         round(categoryStatusDict[each][1]/(len(categoryStatusDict[each][2]) + 1e-8),2)] )
         usageImgSet = usageImgSet | categoryStatusDict[each][2]
         totalBoxes += categoryStatusDict[each][1]
+    
     res.append(["图片总数量",totalImgs,"总框数", totalBoxes])
     res.append(["图片利用数",len(usageImgSet),"图片利用率", str(round(len(usageImgSet)*100/(totalImgs + 1e-8),2))+"%"])
-    # print(res)
 
     label_scatter_plot,label_line_plot,label_bar_plot = plot(res)
 
     return res,len(usageImgSet),label_scatter_plot,label_line_plot,label_bar_plot
 
-# print(print_statistics(r"\\10.10.1.125\ai01\label\label_P-IJC23110092_岚图总装检测\仪表工位\标注图\发图时间_240115\HEC"))
+# path = r"X:\label\label_P-IJC24010009_安徽大众外观检测\自动工位\标注图\发图时间_240704\Model_F"
+# rule = ""
+# print(print_statistics(path,rule))

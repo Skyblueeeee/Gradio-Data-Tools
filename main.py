@@ -105,9 +105,13 @@ class GradioDataTools():
     @flow_api
     def _ff_build(self,ff_imagedir_input,ff_input_imgdir_rule,ff_dbname_input,ff_json_input10,ff_json_input1,
                 ff_json_input2,ff_json_input3,ff_json_input4,ff_json_input5,
-                ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe):
+                ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe,ff_json_sqlname_text):
         if os.path.exists(ff_imagedir_input):
-            cf = GRConstuctFlow(ff_dbname_input, back_up=ff_json_input10)
+            if len(ff_json_sqlname_text) != 0:
+                ff_dbname = ff_json_sqlname_text
+            else:
+                ff_dbname = ff_dbname_input
+            cf = GRConstuctFlow(ff_dbname, back_up=ff_json_input10)
             cf.run( origin_dir= ff_imagedir_input,imgdir_rule=ff_input_imgdir_rule,file_uniqe=ff_json_input_uniqe,
                     init_dateset = ff_json_input1,merge_origin = ff_json_input2,  
                     merge_label  = ff_json_input3,label_attr = ff_json_input4,via_coco_mode=ff_json_input5,
@@ -271,6 +275,7 @@ class GradioDataTools():
                         with gr.Column():
                             with gr.Row():
                                 ff_json_sqlname = gr.Dropdown(label="数据库名称",scale=1)
+                                ff_json_sqlname_text = gr.Textbox(label="关键词")
                                 ff_json_sqlnamef5 = gr.Button("获取",icon=self.refresh_icon_path,elem_classes='refreshbutton',scale=1)
                                 ff_json_input9 = gr.Textbox(self.label_path,label="导出地址",scale=7)
                             with gr.Row():
@@ -305,13 +310,13 @@ class GradioDataTools():
                 ff_json_input14.click(send_image,inputs=[ff_json_sqlname1,ff_json_input15,ff_json_input12,ff_json_input13,ff_json_via_df],outputs=ff_info_output)
                 ff_build_button.click(self._ff_build,inputs=[ff_imagedir_input,ff_input_imgdir_rule,ff_dbname_input,ff_json_input10,ff_json_input1,
                                                             ff_json_input2,ff_json_input3,ff_json_input4,ff_json_input5,
-                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe],outputs=ff_info_output)
+                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe,ff_json_sqlname_text],outputs=ff_info_output)
                 ff_btn_del.click(self._ff_build,inputs=[ff_imagedir_input,ff_input_imgdir_rule,ff_json_sqlname,ff_json_input10,ff_json_input1,
                                                             ff_json_input2,ff_json_input3,ff_json_input4,ff_json_input5,
-                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe],outputs=ff_info_output)
+                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe,ff_json_sqlname_text],outputs=ff_info_output)
                 ff_btn_db.click(self._ff_build,inputs=[ff_imagedir_input,ff_input_imgdir_rule,ff_json_sqlname,ff_json_input10,ff_json_input1,
                                                             ff_json_input2,ff_json_input3,ff_json_input4,ff_json_input5,
-                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe],outputs=ff_info_output)
+                                                            ff_json_input6,ff_json_input7,ff_json_input8,ff_json_input9,ff_json_input_uniqe,ff_json_sqlname_text],outputs=ff_info_output)
                 ff_json_input_options.change(self.update_accordion,inputs=ff_json_input_options,outputs=ff_json_input_options_Acc)
 
             with gr.Tab("数据分析"):

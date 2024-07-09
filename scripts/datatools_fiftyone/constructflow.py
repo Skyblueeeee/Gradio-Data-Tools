@@ -119,7 +119,11 @@ class GRFileAttrCOCODatasetImporter(ff.FitowBaseImporter):
             json_data = json.load(file)
             coco_images = json_data["images"]
             coco_ann = json_data["annotations"]
-
+        ori_image_list = []
+        image_dir = os.path.dirname(self.coco_path)
+        for filename in os.listdir(image_dir):
+            if filename.endswith(".jpg"):
+                ori_image_list.append(filename)
         ann_img_id_list =[]
         for ann in coco_ann:
             ann_img_id_list.append(int(ann["image_id"]))
@@ -171,7 +175,7 @@ class GRConstuctFlow(ff.ConstructFlow):
                                 omit_fields=["filepath"],
                                 insert_new=True
                             )
-                        if "coco" in each_file and via_coco_mode == "COCO":
+                        if "coco" in each_file and via_coco_mode == "COCO" and each_file.startswith("coco"):
                             coco_path = os.path.join(group[0],each_file)
                             print(f"Fiftyone Runing {coco_path} Valid Images")
                             self.merge(
@@ -187,7 +191,7 @@ class GRConstuctFlow(ff.ConstructFlow):
             for group in os.walk(origin_dir):
                 if imgdir_rule in group[0]:
                     for each_file in os.listdir(group[0]):
-                        if "coco" in each_file and each_file.endswith(".json"):
+                        if "coco" in each_file and each_file.endswith(".json") and each_file.startswith("coco"):
                             coco_path = os.path.join(group[0],each_file)
                             print(f"Fiftyone Runing {coco_path} labels")
                             self.merge_labels(
