@@ -22,8 +22,8 @@ def read_images(image_path):
     image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
     return image
 
-dirs = r"scripts\datatools_labeling\models\lantu_yb_hec"
-checkpoint,config = file_info(dirs)
+# dirs = r"scripts\datatools_labeling\models\lantu_yb_hec"
+# checkpoint,config = file_info(dirs)
 
 class MM_Infer_Labeling():
     def __init__(self) -> None:
